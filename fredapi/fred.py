@@ -200,7 +200,7 @@ class Fred(object):
         data = df[df['realtime_start'] <= as_of_date]
         return data
 
-    def get_series_all_releases(self, series_id):
+    def get_series_all_releases(self, series_id, observation_start=None, observation_end=None):
         """
         Get all data for a Fred series id including first releases and all revisions. This returns a DataFrame
         with three columns: 'date', 'realtime_start', and 'value'. For instance, the US GDP for Q4 2013 was first released
@@ -224,6 +224,14 @@ class Fred(object):
                                                                                          series_id,
                                                                                          self.earliest_realtime_start,
                                                                                          self.latest_realtime_end)
+        if observation_start is not None:
+            observation_start = pd.to_datetime(observation_start,
+                                               errors='raise')
+            url += '&observation_start=' + observation_start.strftime('%Y-%m-%d')
+        if observation_end is not None:
+            observation_end = pd.to_datetime(observation_end, errors='raise')
+            url += '&observation_end=' + observation_end.strftime('%Y-%m-%d')
+
         root = self.__fetch_data(url)
         if root is None:
             raise ValueError('No data exists for series id: ' + series_id)
